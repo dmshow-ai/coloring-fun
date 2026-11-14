@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coloring Fun — Big Machines &amp; Rescue Vehicles</title>
+<meta name="description" content="Free online coloring pages for kids: big machines and rescue vehicles. Pick a picture, tap a part to color it, then download or print your artwork!">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Comic Sans MS", "Chalkboard SE", "Segoe UI", system-ui, sans-serif;
+    background: #fff7e6;
+    color: #333;
+    text-align: center;
+  }
+  header {
+    background: linear-gradient(135deg, #ffb703, #fb8500);
+    color: #fff;
+    padding: 16px 10px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  header h1 { font-size: clamp(22px, 5.5vw, 38px); letter-spacing: .5px; text-shadow: 1px 2px 0 rgba(0,0,0,.15); }
+  header p { font-size: clamp(13px, 3.4vw, 17px); margin-top: 4px; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 12px 10px 24px; }
+
+  /* Gallery */
+  .gallery {
+    display: flex; gap: 10px; overflow-x: auto; padding: 10px 2px 14px;
+    -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+  }
+  .gallery button {
+    flex: 0 0 auto; width: 104px; border: 3px solid #ffd166; border-radius: 12px;
+    background: #fff; padding: 5px; cursor: pointer; font-family: inherit;
+  }
+  .gallery button img { width: 100%; height: auto; display: block; border-radius: 7px; }
+  .gallery button span { display: block; font-size: 12px; font-weight: bold; color: #555; padding-top: 4px; }
+  .gallery button.active { border-color: #fb8500; background: #ffe8c2; box-shadow: 0 0 0 2px #fb8500 inset; }
+
+  /* Canvas */
+  .canvas-box {
+    background: #fff; border: 3px solid #ffd166; border-radius: 14px;
+    padding: 8px; box-shadow: 0 3px 10px rgba(0,0,0,.08);
+  }
+  canvas#stage {
+    width: 100%; height: auto; display: block; border-radius: 8px;
+    touch-action: none; cursor: pointer; background: #fff;
+  }
+  .hint { font-size: 14px; color: #777; margin-top: 8px; }
+
+  /* Palette */
+  .palette {
+    display: flex; flex-wrap: wrap; gap: 9px; justify-content: center;
+    margin: 14px auto 4px; max-width: 640px;
+  }
+  .swatch {
+    width: 44px; height: 44px; border-radius: 50%; border: 3px solid rgba(0,0,0,.18);
+    cursor: pointer; padding: 0; flex: 0 0 auto;
+  }
+  .swatch.active { border-color: #333; transform: scale(1.15); box-shadow: 0 2px 7px rgba(0,0,0,.3); }
+  .swatch.eraser { background: #fff; font-size: 20px; line-height: 1; }
+
+  /* Action buttons */
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 14px; }
+  .actions button {
+    font-family: inherit; font-size: 16px; font-weight: bold; cursor: pointer;
+    border: none; border-radius: 999px; padding: 12px 20px; min-height: 48px;
+    background: #e9ecef; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,.12);
+  }
+  .actions button:active { transform: scale(.97); }
+  #btnDownload { background: #2a9d8f; color: #fff; }
+  #btnPrint { background: #4361ee; color: #fff; }
+
+  /* Book promo */
+  .book {
+    margin: 26px auto 0; background: #eaf6ff; border: 3px dashed #4361ee;
+    border-radius: 14px; padding: 18px 14px; max-width: 640px;
+  }
+  .book p { font-size: clamp(16px, 4.4vw, 20px); font-weight: bold; color: #26436b; }
+  /* AMAZON-LINK: plain Amazon link below (no Associates tag yet).
+     To add an Associates tag later, append "?tag=YOURTAG-20" to the href. */
+  .book a {
+    display: inline-block; margin-top: 12px; background: #ff9900; color: #fff;
+    font-size: 18px; font-weight: bold; text-decoration: none;
+    padding: 14px 26px; border-radius: 999px; box-shadow: 0 3px 8px rgba(0,0,0,.2);
+  }
+  footer { padding: 20px 10px 26px; color: #999; font-size: 14px; }
+
+  #printImg { display: none; }
+  @media print {
+    body * { visibility: hidden; }
+    #printImg { display: block; visibility: visible; position: absolute; inset: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🚜 Coloring Fun 🚒</h1>
+  <p>Big Machines &amp; Rescue Vehicles — pick a picture and color it!</p>
+</header>
+
+<div class="wrap">
+
+  <div class="gallery" id="gallery" aria-label="Choose a coloring picture"></div>
+
+  <div class="canvas-box">
+    <canvas id="stage" width="1200" height="800"></canvas>
+    <p class="hint">👆 Tap a part of the picture to fill it with color!</p>
+  </div>
+
+  <div class="palette" id="palette" aria-label="Choose a color"></div>
+
+  <div class="actions">
+    <button id="btnUndo" type="button">↩️ Undo</button>
+    <button id="btnClear" type="button">🧽 Clear</button>
+    <button id="btnDownload" type="button">⬇️ Download PNG</button>
+    <button id="btnPrint" type="button">🖨️ Print</button>
+  </div>
+
+  <div class="book">
+    <p>Like coloring? Get all 50 pages in the printed book:</p>
+    <p style="font-weight:normal; font-size:15px; margin-top:4px;">“Dinosaurs &amp; Big Machines Coloring Book” by MapleHandsCo</p>
+    <!-- AMAZON-LINK: add the Associates tag to this href when available, e.g. https://www.amazon.com/dp/B0HQBPPZNQ?tag=YOURTAG-20 -->
+    <a href="https://www.amazon.com/dp/B0HQBPPZNQ" target="_blank" rel="noopener">📖 Get the Book on Amazon</a>
+  </div>
+
+</div>
+
+<footer>© MapleHandsCo</footer>
+<img id="printImg" alt="Your colored picture">
+
+<script>
+"use strict";
+
+// ---------- Data ----------
+var PICTURES = [
+  { src: "images/pic-01.png", thumb: "thumbs/pic-01.png", name: "Excavator" },
+  { src: "images/pic-02.png", thumb: "thumbs/pic-02.png", name: "Cement Mixer" },
+  { src: "images/pic-03.png", thumb: "thumbs/pic-03.png", name: "Dump Truck" },
+  { src: "images/pic-04.png", thumb: "thumbs/pic-04.png", name: "Backhoe" },
+  { src: "images/pic-05.png", thumb: "thumbs/pic-05.png", name: "Crane Truck" },
+  { src: "images/pic-06.png", thumb: "thumbs/pic-06.png", name: "Bulldozer" },
+  { src: "images/pic-07.png", thumb: "thumbs/pic-07.png", name: "Fire Truck" },
+  { src: "images/pic-08.png", thumb: "thumbs/pic-08.png", name: "Ambulance" },
+  { src: "images/pic-09.png", thumb: "thumbs/pic-09.png", name: "Police Car" },
+  { src: "images/pic-10.png", thumb: "thumbs/pic-10.png", name: "Tow Truck" },
+  { src: "images/pic-11.png", thumb: "thumbs/pic-11.png", name: "Rescue Helicopter" },
+  { src: "images/pic-12.png", thumb: "thumbs/pic-12.png", name: "Fire Boat" }
+];
+
+var COLORS = [
+  "#e63946", "#f4845f", "#ff9900", "#ffd60a", "#fefae0",
+  "#a7c957", "#38b000", "#2a9d8f", "#00b4d8", "#4361ee",
+  "#7209b7", "#f72585", "#ffafcc", "#8d5524", "#6c757d",
+  "#212529", "#ffffff"
+];
+
+// ---------- Setup ----------
+var stage = document.getElementById("stage");
+var sctx = stage.getContext("2d", { willReadFrequently: true });
+var W = stage.width, H = stage.height;
+
+var lineCanvas = document.createElement("canvas");   // original line art
+lineCanvas.width = W; lineCanvas.height = H;
+var lctx = lineCanvas.getContext("2d", { willReadFrequently: true });
+
+var colorCanvas = document.createElement("canvas");  // the user's colors (under the lines)
+colorCanvas.width = W; colorCanvas.height = H;
+var cctx = colorCanvas.getContext("2d", { willReadFrequently: true });
+
+var lineMask = null;      // Uint8Array: 1 = black outline (barrier), 0 = fillable
+var currentColor = COLORS[0];
+var undoStack = [];
+var currentName = PICTURES[0].name;
+
+// Build a barrier mask from the line art: a pixel is a barrier if it is dark.
+// The mask is dilated by 1px so tiny anti-aliasing gaps in the outlines stay sealed.
+function buildMask() {
+  var data = lctx.getImageData(0, 0, W, H).data;
+  var raw = new Uint8Array(W * H);
+  var i, p;
+  for (i = 0, p = 0; i < data.length; i += 4, p++) {
+    var lum = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+    raw[p] = lum < 150 ? 1 : 0;
+  }
+  lineMask = new Uint8Array(W * H);
+  for (var y = 0; y < H; y++) {
+    for (var x = 0; x < W; x++) {
+      var idx = y * W + x;
+      if (raw[idx] ||
+          (x > 0 && raw[idx - 1]) || (x < W - 1 && raw[idx + 1]) ||
+          (y > 0 && raw[idx - W]) || (y < H - 1 && raw[idx + W])) {
+        lineMask[idx] = 1;
+      }
+    }
+  }
+}
+
+// Composite: color layer first, then the line art multiplied on top,
+// so black outlines stay black and crisp over any fill color.
+function render() {
+  sctx.globalCompositeOperation = "source-over";
+  sctx.clearRect(0, 0, W, H);
+  sctx.drawImage(colorCanvas, 0, 0);
+  sctx.globalCompositeOperation = "multiply";
+  sctx.drawImage(lineCanvas, 0, 0);
+  sctx.globalCompositeOperation = "source-over";
+}
+
+function resetColors() {
+  cctx.globalCompositeOperation = "source-over";
+  cctx.fillStyle = "#ffffff";
+  cctx.fillRect(0, 0, W, H);
+  undoStack = [];
+}
+
+function loadPicture(pic, btn) {
+  var img = new Image();
+  img.onload = function () {
+    lctx.globalCompositeOperation = "source-over";
+    lctx.clearRect(0, 0, W, H);
+    lctx.fillStyle = "#ffffff";
+    lctx.fillRect(0, 0, W, H);
+    lctx.drawImage(img, 0, 0, W, H);
+    buildMask();
+    resetColors();
+    render();
+    currentName = pic.name;
+    var buttons = document.querySelectorAll(".gallery button");
+    for (var i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
+    if (btn) btn.classList.add("active");
+  };
+  img.src = pic.src;
+}
+
+// ---------- Flood fill (scanline, stack-based) ----------
+// Fills the whole enclosed non-outline region that contains (sx, sy),
+// regardless of the color it had before, so kids can re-color a part.
+function floodFill(sx, sy, rgb) {
+  if (!lineMask) return;
+  if (lineMask[sy * W + sx]) return; // tapped right on an outline
+  var img = cctx.getImageData(0, 0, W, H);
+  var d = img.data;
+  var visited = new Uint8Array(W * H);
+  var stack = [[sx, sy]];
+  while (stack.length) {
+    var pt = stack.pop();
+    var x = pt[0], y = pt[1];
+    // walk left to the start of this run
+    while (x >= 0 && !lineMask[y * W + x] && !visited[y * W + x]) x--;
+    x++;
+    var spanUp = false, spanDown = false;
+    while (x < W && !lineMask[y * W + x] && !visited[y * W + x]) {
+      var idx = y * W + x;
+      visited[idx] = 1;
+      var o = idx * 4;
+      d[o] = rgb[0]; d[o + 1] = rgb[1]; d[o + 2] = rgb[2]; d[o + 3] = 255;
+      if (y > 0) {
+        var upFree = !lineMask[idx - W] && !visited[idx - W];
+        if (upFree && !spanUp) { stack.push([x, y - 1]); spanUp = true; }
+        else if (!upFree) spanUp = false;
+      }
+      if (y < H - 1) {
+        var dnFree = !lineMask[idx + W] && !visited[idx + W];
+        if (dnFree && !spanDown) { stack.push([x, y + 1]); spanDown = true; }
+        else if (!dnFree) spanDown = false;
+      }
+      x++;
+    }
+  }
+  cctx.putImageData(img, 0, 0);
+}
+
+function hexToRgb(hex) {
+  return [
+    parseInt(hex.slice(1, 3), 16),
+    parseInt(hex.slice(3, 5), 16),
+    parseInt(hex.slice(5, 7), 16)
+  ];
+}
+
+function pushUndo() {
+  undoStack.push(cctx.getImageData(0, 0, W, H));
+  if (undoStack.length > 40) undoStack.shift();
+}
+
+// ---------- Pointer handling (mouse + touch via Pointer Events) ----------
+stage.addEventListener("pointerdown", function (ev) {
+  ev.preventDefault();
+  var rect = stage.getBoundingClientRect();
+  var x = Math.floor((ev.clientX - rect.left) * W / rect.width);
+  var y = Math.floor((ev.clientY - rect.top) * H / rect.height);
+  if (x < 0 || x >= W || y < 0 || y >= H) return;
+  pushUndo();
+  floodFill(x, y, hexToRgb(currentColor));
+  render();
+});
+
+// ---------- Palette ----------
+var paletteEl = document.getElementById("palette");
+COLORS.forEach(function (c, i) {
+  var b = document.createElement("button");
+  b.type = "button";
+  b.className = "swatch" + (i === 0 ? " active" : "");
+  b.style.background = c;
+  b.setAttribute("aria-label", "Color " + c);
+  b.addEventListener("click", function () {
+    currentColor = c;
+    var all = paletteEl.querySelectorAll(".swatch");
+    for (var j = 0; j < all.length; j++) all[j].classList.remove("active");
+    b.classList.add("active");
+  });
+  paletteEl.appendChild(b);
+});
+// Eraser (fills with white, back to blank)
+var eraser = document.createElement("button");
+eraser.type = "button";
+eraser.className = "swatch eraser";
+eraser.textContent = "⌫";
+eraser.setAttribute("aria-label", "Eraser");
+eraser.addEventListener("click", function () {
+  currentColor = "#ffffff";
+  var all = paletteEl.querySelectorAll(".swatch");
+  for (var j = 0; j < all.length; j++) all[j].classList.remove("active");
+  eraser.classList.add("active");
+});
+paletteEl.appendChild(eraser);
+
+// ---------- Gallery ----------
+var galleryEl = document.getElementById("gallery");
+PICTURES.forEach(function (pic, i) {
+  var b = document.createElement("button");
+  b.type = "button";
+  if (i === 0) b.className = "active";
+  var im = document.createElement("img");
+  im.src = pic.thumb;
+  im.alt = pic.name;
+  im.loading = "lazy";
+  var label = document.createElement("span");
+  label.textContent = pic.name;
+  b.appendChild(im);
+  b.appendChild(label);
+  b.addEventListener("click", function () { loadPicture(pic, b); });
+  galleryEl.appendChild(b);
+});
+
+// ---------- Actions ----------
+document.getElementById("btnUndo").addEventListener("click", function () {
+  var prev = undoStack.pop();
+  if (prev) { cctx.putImageData(prev, 0, 0); render(); }
+});
+document.getElementById("btnClear").addEventListener("click", function () {
+  pushUndo();
+  resetColorsKeepUndo();
+  render();
+});
+function resetColorsKeepUndo() {
+  cctx.fillStyle = "#ffffff";
+  cctx.fillRect(0, 0, W, H);
+}
+document.getElementById("btnDownload").addEventListener("click", function () {
+  var a = document.createElement("a");
+  a.download = "coloring-" + currentName.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".png";
+  a.href = stage.toDataURL("image/png");
+  a.click();
+});
+document.getElementById("btnPrint").addEventListener("click", function () {
+  var img = document.getElementById("printImg");
+  img.src = stage.toDataURL("image/png");
+  setTimeout(function () { window.print(); }, 60);
+});
+
+// ---------- Go ----------
+loadPicture(PICTURES[0], galleryEl.querySelector("button"));
+</script>
+</body>
+</html>
